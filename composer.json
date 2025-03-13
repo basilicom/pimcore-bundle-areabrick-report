@@ -1,0 +1,19 @@
+{
+    "name": "basilicom/pimcore-bundle-areabrick-report",
+    "description": "Adds a report to find Areabricks on documents",
+    "type": "pimcore-bundle",
+    "autoload": {
+        "psr-4": {
+            "Basilicom\\AreabrickReport\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Kerstin Gerull",
+            "email": "kerstin.gerull@basilicom.de"
+        }
+    ],
+    "require": {
+        "php": "^8.2"
+    }
+}
