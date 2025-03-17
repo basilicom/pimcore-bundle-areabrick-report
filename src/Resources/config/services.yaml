@@ -1,19 +1,10 @@
 services:
+
   #
-  # Custom Reports
+  # Command
   #
-  basilicom.areabrick_report.custom_report.adapter.factory:
-    class: Basilicom\AreabrickReport\CustomReport\AreabricksReportAdapterFactory
+  Basilicom\AreabrickReport\Command\AreabrickReportDataCommand:
     arguments:
-      - 'Basilicom\AreabrickReport\CustomReport\Areabricks'
-      - '@Pimcore\Extension\Document\Areabrick\AreabrickManager'
-      - '@doctrine.dbal.default_connection'
-
-  Pimcore\Extension\Document\Areabrick\AreabrickManager: ~
-
-  #
-  # EventListener
-  #
-  Basilicom\AreabrickReport\EventListener\PimcoreAdminEventListener:
-    tags:
-      - { name: kernel.event_listener, event: pimcore.bundle_manager.paths.js, method: addAdminJSFiles }
+      $areabrickManager: '@Pimcore\Extension\Document\Areabrick\AreabrickManager'
+      $connection: '@doctrine.dbal.default_connection'
+    tags: [ 'console.command' ]

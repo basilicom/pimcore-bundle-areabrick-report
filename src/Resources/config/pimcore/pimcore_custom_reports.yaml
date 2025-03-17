@@ -1,38 +1,68 @@
 pimcore_custom_reports:
-  adapters:
-    areabricks: basilicom.areabrick_report.custom_report.adapter.factory
   definitions:
     areabricks:
       name: areabricks
       sql: ''
       dataSourceConfig:
         -
-          type: areabricks
+          sql: '*'
+          from: areabrick_report
+          where: ''
+          groupby: ''
+          orderby: areabrickName
+          orderbydir: ASC
+          type: sql
       columnConfiguration:
         -
-          name: areabrickId
+          name: id
+          display: false
+          export: false
+          order: false
+          width: 80
+          label: 'Id'
+          id: extModel726-1
+        -
+          name: areabrickName
           display: true
           export: true
-          order: false
+          order: true
           width: 200
           label: Areabrick
-          filter: ''
-          displayType: ''
+          displayType: text
           filter_drilldown: filter_and_show
-          id: extModel426-1
+          filter: string
+          id: extModel726-2
         -
-          name: documentId
+          name: areabrickId
+          display: false
+          export: false
+          order: false
+          width: 200
+          label: 'Areabrick Id'
+          filter: string
+          id: extModel726-3
+        -
+          name: documentPath
           display: true
           export: true
-          order: false
+          order: true
           width: ''
-          label: Dokument
-          filter: ''
-          displayType: null
+          label: Document
+          displayType: text
           filter_drilldown: filter_and_show
+          filter: string
+          id: extModel726-4
+        -
+          name: documentId
+          display: false
+          export: false
+          order: false
+          width: 80
+          label: 'Document Id'
+          filter: number
           columnAction: openDocument
-          id: extModel426-2
-      niceName: 'Areabrick (keine Pagination)'
+          id: extModel726-5
+      niceName: Areabrick
       group: ''
       groupIconClass: ''
       iconClass: ''
@@ -43,8 +73,8 @@ pimcore_custom_reports:
       pieLabelColumn: null
       xAxis: null
       yAxis: {  }
-      modificationDate: 1741099298
-      creationDate: 1741020069
+      modificationDate: 1742227972
+      creationDate: 1742227758
       shareGlobally: true
       sharedUserNames: {  }
       sharedRoleNames: {  }
