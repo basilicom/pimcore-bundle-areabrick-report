@@ -1,5 +1,8 @@
 
 # Installation
+```
+composer require basilicom/pimcore-bundle-areabrick-report
+```
 
 add to bundles.php
 
@@ -8,6 +11,19 @@ return [
     // ...
     PimcorePluginAreabrickReportBundle::class => ['all' => true],
 ];
+```
+
+## Command
+
+Add the command to run every x minutes, depending how often you want to update the data in the report.
+```
+bin/console basilicom:report:areabrick
+```
+
+For updating we suggest to use the force flag, because it will drop and create the database table. 
+So it there are changes to the database table it will be updated.
+```
+bin/console basilicom:report:areabrick -f true
 ```
 
 # Info
@@ -22,3 +38,6 @@ Filter by Areabrick
 
 Filter by Document
 ![areabricks-report-list-filter-document.png](docs/areabricks-report-list-filter-document.png)
+
+Filter by Areabrick and Document
+![areabricks-report-list-filter-both.png](docs/areabricks-report-list-filter-both.png)
