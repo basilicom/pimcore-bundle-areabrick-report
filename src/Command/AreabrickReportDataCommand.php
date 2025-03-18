@@ -3,9 +3,11 @@
 namespace Basilicom\AreabrickReport\Command;
 
 use Doctrine\DBAL\Connection;
-use Doctrine\DBAL\Exception;
+use Doctrine\DBAL\Exception as DbalException;
+use Exception;
 use Pimcore\Console\AbstractCommand;
 use Pimcore\Extension\Document\Areabrick\AreabrickManager;
+use Pimcore\Model\Document;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -21,11 +23,18 @@ class AreabrickReportDataCommand extends AbstractCommand
 {
     private const TABLE_NAME = 'areabrick_report';
 
+    /**
+     * @var string[]
+     */
+    private array $areabricks;
+
     public function __construct(
         private readonly AreabrickManager $areabrickManager,
         private readonly Connection $connection,
     ) {
         parent::__construct();
+
+        $this->areabricks = $this->getAreabricks();
     }
 
     public function configure(): void
@@ -57,56 +66,13 @@ class AreabrickReportDataCommand extends AbstractCommand
             }
 
             $this->indexAreabricks();
-        } catch (Exception $exception) {
+        } catch (DbalException $exception) {
             $this->writeError('Error: ' . $exception->getMessage());
 
             return Command::FAILURE;
         }
 
         return Command::SUCCESS;
-    }
-
-    /**
-     * @throws Exception
-     */
-    private function indexAreabricks(): void
-    {
-        $areabricks = $this->getAreabricks();
-
-        foreach ($areabricks as $areabrickId => $areabrickName) {
-            $query = [];
-            $query[] = 'SELECT * FROM documents_editables';
-            $query[] = 'JOIN documents ON documents.id = documents_editables.documentId';
-            $query[] = 'WHERE documents_editables.type = \'areablock\'';
-            $query[] = 'and data like \'%' . sprintf('s:4:"type";s:%s:"%s";', strlen($areabrickId), $areabrickId) . '%\'';
-
-            $this->writeComment(sprintf('Index areabrick %s (%s).', $areabrickName, $areabrickId));
-
-            $result = $this->connection->executeQuery(implode(' ', $query))->fetchAllAssociative();
-            if (empty($result)) {
-                $data = [
-                    'areabrickName' => $areabrickName,
-                    'areabrickId' => $areabrickId,
-                    'documentPath' => 'not in use',
-                    'documentId' => 1,
-                ];
-                $this->connection->insert(self::TABLE_NAME, $data);
-
-                continue;
-            }
-
-            foreach ($result as $item) {
-                $data = [
-                    'areabrickName' => $areabrickName,
-                    'areabrickId' => $areabrickId,
-                    'documentPath' => $item['path'] . $item['key'],
-                    'documentId' => $item['documentId'],
-                ];
-                $this->connection->insert(self::TABLE_NAME, $data);
-            }
-        }
-
-        $this->writeInfo(sprintf('Index %s areabrick types.', count($areabricks)));
     }
 
     /**
@@ -122,8 +88,13 @@ class AreabrickReportDataCommand extends AbstractCommand
         return $data;
     }
 
+    private function getAreabrickName(string $id): string
+    {
+        return $this->areabricks[$id] ?? '';
+    }
+
     /**
-     * @throws Exception
+     * @throws DbalException
      */
     private function checkIfTableExists(): bool
     {
@@ -134,7 +105,7 @@ class AreabrickReportDataCommand extends AbstractCommand
     }
 
     /**
-     * @throws Exception
+     * @throws DbalException
      */
     private function dropTable(): void
     {
@@ -145,7 +116,7 @@ class AreabrickReportDataCommand extends AbstractCommand
     }
 
     /**
-     * @throws Exception
+     * @throws DbalException
      */
     private function truncateTable(): void
     {
@@ -156,7 +127,7 @@ class AreabrickReportDataCommand extends AbstractCommand
     }
 
     /**
-     * @throws Exception
+     * @throws DbalException
      */
     private function createTable(): void
     {
@@ -166,15 +137,69 @@ class AreabrickReportDataCommand extends AbstractCommand
         $createTableQuery[] = 'id int NOT NULL AUTO_INCREMENT,';
         $createTableQuery[] = 'areabrickName varchar(255) NOT NULL,';
         $createTableQuery[] = 'areabrickId varchar(255) NOT NULL,';
-        $createTableQuery[] = 'documentPath varchar(255) NOT NULL,';
+        $createTableQuery[] = 'areabrickIndex int NOT NULL,';
+        $createTableQuery[] = 'documentPathKey varchar(255) NOT NULL,';
+        $createTableQuery[] = 'documentType varchar(255) NOT NULL,';
+        $createTableQuery[] = 'documentTitle varchar(255) NOT NULL,';
+        $createTableQuery[] = 'documentLanguage varchar(10) NOT NULL,';
         $createTableQuery[] = 'documentId int NOT NULL,';
         $createTableQuery[] = 'PRIMARY KEY (id),';
         $createTableQuery[] = 'INDEX index_areabrickName (areabrickName),';
-        $createTableQuery[] = 'INDEX index_documentPath (documentPath)';
+        $createTableQuery[] = 'INDEX index_documentPathKey (documentPathKey)';
         $createTableQuery[] = ')';
 
         $this->connection->executeQuery(implode(' ', $createTableQuery));
 
         $this->writeComment('Database table "' . self::TABLE_NAME . '" was be created.');
+    }
+
+    /**
+     * @throws Exception
+     */
+    private function indexAreabricks(): void
+    {
+        $listing = Document::getList([
+            'unpublished' => true,
+            'condition' => "type IN ('page', 'snippet', 'email')",
+            'orderKey' => ['key'],
+            'order' => 'desc',
+        ]);
+
+        foreach ($listing as $document) {
+            $title = $document->getKey();
+            if (method_exists($document, 'getTitle')) {
+                $title = $document->getTitle();
+            }
+            $data = [
+                'documentId' => $document->getId(),
+                'documentType' => $document->getType(),
+                'documentTitle' => $title,
+                'documentLanguage' => $document->getProperty('language'),
+                'documentPathKey' => $document->getPath() . $document->getKey(),
+            ];
+
+            foreach ($document->getEditables() as $editable) {
+                if (!$editable instanceof Document\Editable\Areablock) {
+                    continue;
+                }
+
+                $count = 1;
+                foreach ($editable->getIndices() as $areabrick) {
+                    $name = $this->getAreabrickName($areabrick['type']);
+                    if (empty($name)) {
+                        continue;
+                    }
+
+                    $rowData = $data;
+                    $rowData['areabrickIndex'] = $count;
+                    $rowData['areabrickId'] = $areabrick['type'];
+                    $rowData['areabrickName'] = $this->getAreabrickName($areabrick['type']);
+
+                    $this->connection->insert(self::TABLE_NAME, $rowData);
+
+                    $count++;
+                }
+            }
+        }
     }
 }

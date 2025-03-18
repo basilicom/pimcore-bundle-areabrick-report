@@ -28,8 +28,8 @@ bin/console basilicom:report:areabrick -f true
 
 # Info
 
-Shows a report with a filter of documents and areabricks.
-Cannot be sorted or paginated.
+Shows a report with a filter of documents, areabricks and language.
+Filters can be combined.
 
 ![areabricks-report-list.png](docs/areabricks-report-list.png)
 
@@ -39,5 +39,5 @@ Filter by Areabrick
 Filter by Document
 ![areabricks-report-list-filter-document.png](docs/areabricks-report-list-filter-document.png)
 
-Filter by Areabrick and Document
-![areabricks-report-list-filter-both.png](docs/areabricks-report-list-filter-both.png)
+Filter by Language
+![areabricks-report-list-filter-language.png](docs/areabricks-report-list-filter-language.png)

@@ -9,15 +9,15 @@ pimcore_custom_reports:
           from: areabrick_report
           where: ''
           groupby: ''
-          orderby: areabrickName
+          orderby: documentPathKey
           orderbydir: ASC
           type: sql
       columnConfiguration:
         -
           name: id
           display: false
-          export: false
-          order: false
+          export: true
+          order: true
           width: 80
           label: 'Id'
           id: extModel726-1
@@ -27,7 +27,7 @@ pimcore_custom_reports:
           export: true
           order: true
           width: 200
-          label: Areabrick
+          label: 'Areabrick'
           displayType: text
           filter_drilldown: filter_and_show
           filter: string
@@ -35,33 +35,73 @@ pimcore_custom_reports:
         -
           name: areabrickId
           display: false
-          export: false
-          order: false
+          export: true
+          order: true
           width: 200
           label: 'Areabrick Id'
           filter: string
           id: extModel726-3
         -
-          name: documentPath
+          name: areabrickIndex
+          display: true
+          export: true
+          order: true
+          width: 50
+          label: 'Index'
+          filter: number
+          id: extModel726-4
+        -
+          name: documentTitle
+          display: true
+          export: true
+          order: true
+          width: 200
+          label: 'Document Title'
+          displayType: text
+          filter_drilldown: filter_and_show
+          filter: string
+          id: extModel726-5
+        -
+          name: documentPathKey
           display: true
           export: true
           order: true
           width: ''
-          label: Document
+          label: 'Document Path'
+          displayType: text
+          filter: string
+          id: extModel726-6
+        -
+          name: documentType
+          display: true
+          export: true
+          order: true
+          width: 100
+          label: 'Document Type'
+          displayType: text
+          filter: string
+          id: extModel726-7
+        -
+          name: documentLanguage
+          display: true
+          export: true
+          order: true
+          width: 80
+          label: 'Language'
           displayType: text
           filter_drilldown: filter_and_show
           filter: string
-          id: extModel726-4
+          id: extModel726-8
         -
           name: documentId
           display: false
-          export: false
-          order: false
+          export: true
+          order: true
           width: 80
           label: 'Document Id'
           filter: number
           columnAction: openDocument
-          id: extModel726-5
+          id: extModel726-9
       niceName: Areabrick
       group: ''
       groupIconClass: ''
