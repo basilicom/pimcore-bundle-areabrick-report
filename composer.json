@@ -2,6 +2,7 @@
     "name": "basilicom/pimcore-bundle-areabrick-report",
     "description": "Adds a report to find Areabricks on documents",
     "type": "pimcore-bundle",
+    "license": "GPL-3.0-or-later",
     "autoload": {
         "psr-4": {
             "Basilicom\\AreabrickReport\\": "src/"
