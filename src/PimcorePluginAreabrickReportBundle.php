@@ -20,6 +20,6 @@ class PimcorePluginAreabrickReportBundle extends AbstractPimcoreBundle
      */
     public function getVersion(): string
     {
-        return InstalledVersions::getVersion('basilicom/pimcore-plugin-migration-toolkit');
+        return InstalledVersions::getVersion('basilicom/pimcore-bundle-areabrick-report') ?? '';
     }
 }
