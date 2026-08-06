@@ -16,6 +16,6 @@
     ],
     "require": {
         "php": "^8.2",
-        "pimcore/pimcore": "^11.5."
+        "pimcore/pimcore": "^11.5 || ^12.0"
     }
 }
